@@ -1,42 +1,78 @@
-
-
 import { fetchBreeds, fetchCatByBreed } from './js/cat-api';
 
-const ref = {
-    selector: document.querySelector('.breed-select'),
-    divCatInfo: document.querySelector('.cat-info'),
-    loader: document.querySelector('.loader'),
-    error: document.querySelector('.error'),
+const refs = {
+  selector: document.querySelector('.breed-select'),
+  divCatInfo: document.querySelector('.cat-info'),
+  loader: document.querySelector('.loader'),
+  error: document.querySelector('.error'),
 };
 
-const { selector, divCatInfo, loader, error } = ref;
+//створюємо options
+function getAllCats(arr) {
+  for (let i = 0; i < arr.length; i += 1) {
+    let value = arr[i].id;
+    let text = arr[i].name;
 
-// Заповнення по id породи і виведення назви для користувача
+    const optionsElement = document.createElement('option');
+    optionsElement.value = value;
+    optionsElement.textContent = text;
+    refs.selector.appendChild(optionsElement);
+  }
+}
 
-let arrBreedsId = [];
+addCats();
 
-fetchBreeds()
-    .then(data => {
-        data.forEach(element => {
-            arrBreedsId.push({ text: element.name, value: element.id });
-        });
-    })
+// робимо фетч та додаємо options
+function addCats() {
+  fetchBreeds()
+    .then(getAllCats)
+    .catch(error => console.log(error));
+}
 
-    .catch((error) => console.log('Oops! Something went wrong! Try reloading the page!'));
+refs.selector.addEventListener('change', createModalCat);
 
-// Додаємо слухача на форму, викликаємо масив котів, генеруємо розмітку
+// прослуховує селект
+function onSelectBreed() {
+  const selectedValue = refs.selector.options[refs.selector.selectedIndex];
+  const selecteId = selectedValue.value;
 
-selector.addEventListener('change', onSelectBreed);
+  return selecteId;
+}
 
-function onSelectBreed(event) {
+//робить розмітку
+function markup(arr) {
+  let imgUrl = arr.map(link => link.url);
 
-    const breedId = event.currentTarget.value;
-    fetchCatByBreed(breedId)
-        .then(data => {
-            const { url, breeds } = data[0];
+  let catDesc = arr.map(cat => cat.breeds[0].description);
 
-            divCatInfo.innerHTML = `<div><img src="${url}" alt="${breeds[0].name}" width="400"><h2>${breeds[0].name}</h2><p>${breeds[0].description}</p><p>${breeds[0].temperament}</p></div>`
+  let catTemp = arr.map(cat => cat.breeds[0].temperament);
 
-        })
-        .catch((error) => console.log('Oops! Something went wrong! Try reloading the page!'));
+  const markup = `<img class="cat-img" src="${imgUrl}" width="600">
+    <p><b>Description: </b>${catDesc}</p>
+    <p><b>Temperament: </b>${catTemp}</p>`;
+
+  refs.divCatInfo.insertAdjacentHTML('beforeend', markup);
+}
+
+// додає розмітку з даними
+function createModalCat() {
+  const breedId = onSelectBreed();
+
+  const isContent = document.querySelector('.cat-img');
+
+  if (isContent) {
+    clearCatContent();
+  }
+
+  fetchCatByBreed(breedId)
+    .then(markup)
+    .catch(error => console.log(error));
+}
+
+function clearCatContent() {
+  const children = Array.from(refs.divCatInfo.children);
+
+  children.forEach(child => {
+    refs.divCatInfo.removeChild(child);
+  });
 }
