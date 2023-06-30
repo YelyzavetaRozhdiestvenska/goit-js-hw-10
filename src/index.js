@@ -1,4 +1,6 @@
+import './styles.css';
 import { fetchBreeds, fetchCatByBreed } from './js/cat-api';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const refs = {
   selector: document.querySelector('.breed-select'),
@@ -6,6 +8,9 @@ const refs = {
   loader: document.querySelector('.loader'),
   error: document.querySelector('.error'),
 };
+
+// loader.classList.replace('loader', 'is-hidden');
+// error.classList.add('is-hidden');
 
 //створюємо options
 function getAllCats(arr) {
@@ -31,15 +36,17 @@ function addCats() {
 
 refs.selector.addEventListener('change', createModalCat);
 
-// прослуховує селект
+// функція, що прослуховує селект
 function onSelectBreed() {
+  // loader.classList.replace('is-hidden', 'loader');
+
   const selectedValue = refs.selector.options[refs.selector.selectedIndex];
   const selecteId = selectedValue.value;
 
   return selecteId;
 }
 
-//робить розмітку
+//Функція, що робить робить розмітку
 function markup(arr) {
   let imgUrl = arr.map(link => link.url);
 
@@ -68,6 +75,8 @@ function createModalCat() {
     .then(markup)
     .catch(error => console.log(error));
 }
+
+// Видаляє попередній контент
 
 function clearCatContent() {
   const children = Array.from(refs.divCatInfo.children);
