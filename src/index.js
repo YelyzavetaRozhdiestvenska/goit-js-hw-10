@@ -9,8 +9,10 @@ const refs = {
   error: document.querySelector('.error'),
 };
 
-// loader.classList.replace('loader', 'is-hidden');
-// error.classList.add('is-hidden');
+// refs.loader.classList.remove('unvisible');
+// refs.error.classList.add('unvisible');
+// refs.selector.classList.add('unvisible');
+refs.divCatInfo.classList.add('unvisible');
 
 //створюємо options
 function getAllCats(arr) {
@@ -29,16 +31,14 @@ addCats();
 
 // робимо фетч та додаємо options
 function addCats() {
-  fetchBreeds()
-    .then(getAllCats)
-    .catch(error => console.log(error));
+  fetchBreeds().then(getAllCats).catch(ShowError);
 }
 
 refs.selector.addEventListener('change', createModalCat);
 
 // функція, що прослуховує селект
 function onSelectBreed() {
-  // loader.classList.replace('is-hidden', 'loader');
+  refs.loader.classList.remove('unvisible');
 
   const selectedValue = refs.selector.options[refs.selector.selectedIndex];
   const selecteId = selectedValue.value;
@@ -73,7 +73,11 @@ function createModalCat() {
 
   fetchCatByBreed(breedId)
     .then(markup)
-    .catch(error => console.log(error));
+    .catch(ShowError)
+    .finally(() => {
+      refs.loader.classList.add('unvisible');
+      refs.divCatInfo.classList.remove('unvisible');
+    });
 }
 
 // Видаляє попередній контент
@@ -84,4 +88,8 @@ function clearCatContent() {
   children.forEach(child => {
     refs.divCatInfo.removeChild(child);
   });
+}
+
+function ShowError() {
+  Notify.failure('Oops! Something wentwrong! Try reloading the page!');
 }
